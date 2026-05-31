@@ -1,0 +1,9 @@
+# Ignore build artifacts
+BankSystem.exe
+*.exe
+*.o
+*.obj
+*.out
+
+# IDE/Editor files
+.vscode/
