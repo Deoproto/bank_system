@@ -3,24 +3,25 @@
 #include "BankSystem.hpp"
 
 int main() {
-    // Включваме кирилицата
     std::setlocale(LC_ALL, "bg_BG.UTF-8");
-    
     BankSystem bank;
 
-    // Отваряме сметка със 100 BGN баланс и 2 BGN такса
-    bank.openCheckingAccount("BG11BNKB1111", "Петър Петров", 100.0, 2.00); 
+    // Създаваме две сметки
+    bank.openCheckingAccount("BG11BNKB1111", "Петър", 200.0, 2.00); // 200 лв., 2 лв. такса
+    bank.openSavingsAccount("BG22BNKB2222", "Елена", 500.0, 0.0);   // 500 лв.
 
-    std::cout << "\n--- ТЕСТ 1: Опит за теглене на прекалено голяма сума ---\n";
-    bank.performWithdraw("BG11BNKB1111", 500.0); // Трябва да хвърли runtime_error (няма толкова пари)
+    bank.displayAllAccounts();
 
-    std::cout << "\n--- ТЕСТ 2: Опит за операция с отрицателна сума ---\n";
-    bank.performDeposit("BG11BNKB1111", -20.0); // Трябва да хвърли invalid_argument (нелегална сума)
+    std::cout << "\n--- ТЕСТ 1: Успешен трансфер (Петър праща 50 лв. на Елена) ---\n";
+    bank.performTransfer("BG11BNKB1111", "BG22BNKB2222", 50.0);
+    // Петър трябва да има: 200 - 50 - 2 такса = 148 лв.
+    // Елена трябва да има: 500 + 50 = 550 лв.
 
-    std::cout << "\n--- ТЕСТ 3: Легална операция за проверка ---\n";
-    bank.performWithdraw("BG11BNKB1111", 50.0); // Трябва да мине успешно (50 + 2 такса = 52 удържани)
+    bank.displayAllAccounts();
 
-    // Показваме сметката, за да видим крайния баланс
+    std::cout << "\n--- ТЕСТ 2: Неуспешен трансфер (Петър иска да прати 200 лв., но има само 148) ---\n";
+    bank.performTransfer("BG11BNKB1111", "BG22BNKB2222", 200.0); // Трябва да се откаже и балансите да не се променят
+
     bank.displayAllAccounts();
 
     return 0;

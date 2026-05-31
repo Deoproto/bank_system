@@ -91,3 +91,30 @@ void BankSystem::performWithdraw(const std::string& iban, double amount) {
         std::cout << "[Отказ на operation] Грешка: " << e.what() << "\n";
     }
 }
+
+void BankSystem::performTransfer(const std::string& fromIban, const std::string& toIban, double amount) {
+    Account* fromAcc = findAccount(fromIban);
+    Account* toAcc = findAccount(toIban);
+
+    if (!fromAcc) {
+        std::cout << "[Трансфер - Грешка] Сметката на изпращача (" << fromIban << ") не е намерена.\n";
+        return;
+    }
+    if (!toAcc) {
+        std::cout << "[Трансфер - Грешка] Сметката на получателя (" << toIban << ") не е намерена.\n";
+        return;
+    }
+
+    try {
+        // 1. Опитваме да изтеглим парите от изпращача (ако няма наличност, тук ще хвърли изключение)
+        fromAcc->withdraw(amount);
+        
+        // 2. Ако тегленето е успешно, депозираме парите при получателя
+        toAcc->deposit(amount);
+        
+        std::cout << "[Успешен трансфер] Преведени са " << amount << " BGN от " << fromIban << " към " << toIban << "\n";
+    } catch (const std::exception& e) {
+        // Ако withdraw хвърли изключение, кодът скача тук и депозитът на получателя НЕ се изпълнява
+        std::cout << "[Трансфер - Отказан] Операцията пропадна: " << e.what() << "\n";
+    }
+}

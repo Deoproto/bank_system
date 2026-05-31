@@ -13,6 +13,7 @@ private:
     Account* findAccount(const std::string& iban) const;
 
 public:
+    // Добави това в BankSystem.hpp в публичната секция (public):
     BankSystem();
     ~BankSystem(); // Деструкторът ще чисти заделената динамична памет, за да няма Memory Leaks
 
@@ -27,6 +28,8 @@ public:
     void displayAllAccounts() const;
     void performDeposit(const std::string& iban, double amount);
     void performWithdraw(const std::string& iban, double amount);
+    void performTransfer(const std::string& fromIban, const std::string& toIban, double amount);
+
 };
 
 #endif // BANK_SYSTEM_HPP
