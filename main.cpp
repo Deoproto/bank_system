@@ -1,25 +1,31 @@
 #include <iostream>
-#include "CheckingAccount.hpp"
-#include "SavingsAccount.hpp"
+#include "BankSystem.hpp"
 
 int main() {
-    std::cout << "=== СТАРТИРАНЕ НА ТЕСТ ЗА СМЕТКИТЕ ===" << std::endl;
+    // Създаваме банковата система
+    BankSystem bank;
 
-    // 1. Създаваме Разплащателна сметка: 500 лв. първоначален баланс и 2.50 лв. такса
-    CheckingAccount checking("BG99BNKB1111", "Иван Иванов", 500.0, 2.50);
+    // 1. Тест на Функционалност 3: Отваряне на сметки през системата
+    bank.openCheckingAccount("BG11BNKB1111", "Петър Петров", 300.0, 2.00); // 2.00 лв. такса
+    bank.openSavingsAccount("BG22BNKB2222", "Елена Георгиева", 2000.0, 0.03); // 3% лихва
 
-    // 2. Създаваме Спестовна сметка: 1000 лв. първоначален баланс и 5% (0.05) лихва
-    SavingsAccount savings("BG99BNKB2222", "Мария Петрова", 1000.0, 0.05);
+    bank.displayAllAccounts();
 
-    // --- ТЕСТ 1: Теглене от разплащателна сметка (трябва да вземе сумата + таксата) ---
-    std::cout << "\n[Иван - Преди] Баланс: " << checking.getBalance() << " BGN\n";
-    checking.withdraw(100.0); // Теглим 100 лв. + 2.50 лв. такса = 102.50 лв. удържани
-    std::cout << "[Иван - След] Баланс: " << checking.getBalance() << " BGN\n";
+    // 2. Тест на транзакции през мениджъра
+    std::cout << "\n[Тест] Петър тегли 50 BGN...\n";
+    bank.performWithdraw("BG11BNKB1111", 50.0); // Трябва да удържа 50 + 2 лв. такса
 
-    // --- ТЕСТ 2: Начисляване на лихва върху спестовна сметка ---
-    std::cout << "\n[Мария - Преди] Баланс: " << savings.getBalance() << " BGN\n";
-    savings.applyInterest(); // Начислява 5% върху 1000 лв. = +50 лв.
-    std::cout << "[Мария - След] Баланс: " << savings.getBalance() << " BGN\n";
+    std::cout << "\n[Тест] Елена депозира 500 BGN...\n";
+    bank.performDeposit("BG22BNKB2222", 500.0);
+
+    bank.displayAllAccounts();
+
+    // 3. Тест на Функционалност 4: Затваряне (изтриване) на сметка
+    std::cout << "\n[Тест] Затваряне на разплащателната сметка на Петър...\n";
+    bank.closeAccount("BG11BNKB1111");
+
+    // Показваме финалния списък (трябва да е останала само Елена)
+    bank.displayAllAccounts();
 
     return 0;
 }
