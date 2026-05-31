@@ -1,29 +1,30 @@
 #include "SavingsAccount.hpp"
 #include <iostream>
+#include <stdexcept>
 
-// Конструктор: предава данните на базовия клас (Account) и инициализира лихвения процент
 SavingsAccount::SavingsAccount(std::string iban, std::string owner, double initialBalance, double rate)
     : Account(iban, owner, initialBalance), interestRate(rate) {}
 
-// Имплементация на депозит
 void SavingsAccount::deposit(double amount) {
-    if (amount > 0) {
-        balance += amount;
-        transactions.push_back(Transaction("DEPOSIT", amount));
+    if (amount <= 0) {
+        throw std::invalid_argument("Сумата за депозит трябва да бъде положително число!");
     }
+    balance += amount;
+    transactions.push_back(Transaction("DEPOSIT", amount));
 }
 
-// Имплементация на теглене (няма такса, но проверява за наличност)
 void SavingsAccount::withdraw(double amount) {
-    if (amount > 0 && balance >= amount) {
-        balance -= amount;
-        transactions.push_back(Transaction("WITHDRAWAL", amount));
-    } else {
-        std::cout << "[Грешка] Недостатъчна наличност в спестовната сметка.\n";
+    if (amount <= 0) {
+        throw std::invalid_argument("Сумата за теглене трябва да бъде положително число!");
     }
+    if (balance < amount) {
+        throw std::runtime_error("Недостатъчна наличност в спестовната сметка!");
+    }
+    
+    balance -= amount;
+    transactions.push_back(Transaction("WITHDRAWAL", amount));
 }
 
-// Специфичен метод за начисляване на лихва върху текущия баланс
 void SavingsAccount::applyInterest() {
     double interestEarned = balance * interestRate;
     if (interestEarned > 0) {
@@ -33,7 +34,4 @@ void SavingsAccount::applyInterest() {
     }
 }
 
-// Гетер за лихвения процент
-double SavingsAccount::getInterestRate() const { 
-    return interestRate; 
-}
+double SavingsAccount::getInterestRate() const { return interestRate; }

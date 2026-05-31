@@ -1,30 +1,26 @@
 #include <iostream>
+#include <clocale>
 #include "BankSystem.hpp"
 
 int main() {
-    // Създаваме банковата система
+    // Включваме кирилицата
+    std::setlocale(LC_ALL, "bg_BG.UTF-8");
+    
     BankSystem bank;
 
-    // 1. Тест на Функционалност 3: Отваряне на сметки през системата
-    bank.openCheckingAccount("BG11BNKB1111", "Петър Петров", 300.0, 2.00); // 2.00 лв. такса
-    bank.openSavingsAccount("BG22BNKB2222", "Елена Георгиева", 2000.0, 0.03); // 3% лихва
+    // Отваряме сметка със 100 BGN баланс и 2 BGN такса
+    bank.openCheckingAccount("BG11BNKB1111", "Петър Петров", 100.0, 2.00); 
 
-    bank.displayAllAccounts();
+    std::cout << "\n--- ТЕСТ 1: Опит за теглене на прекалено голяма сума ---\n";
+    bank.performWithdraw("BG11BNKB1111", 500.0); // Трябва да хвърли runtime_error (няма толкова пари)
 
-    // 2. Тест на транзакции през мениджъра
-    std::cout << "\n[Тест] Петър тегли 50 BGN...\n";
-    bank.performWithdraw("BG11BNKB1111", 50.0); // Трябва да удържа 50 + 2 лв. такса
+    std::cout << "\n--- ТЕСТ 2: Опит за операция с отрицателна сума ---\n";
+    bank.performDeposit("BG11BNKB1111", -20.0); // Трябва да хвърли invalid_argument (нелегална сума)
 
-    std::cout << "\n[Тест] Елена депозира 500 BGN...\n";
-    bank.performDeposit("BG22BNKB2222", 500.0);
+    std::cout << "\n--- ТЕСТ 3: Легална операция за проверка ---\n";
+    bank.performWithdraw("BG11BNKB1111", 50.0); // Трябва да мине успешно (50 + 2 такса = 52 удържани)
 
-    bank.displayAllAccounts();
-
-    // 3. Тест на Функционалност 4: Затваряне (изтриване) на сметка
-    std::cout << "\n[Тест] Затваряне на разплащателната сметка на Петър...\n";
-    bank.closeAccount("BG11BNKB1111");
-
-    // Показваме финалния списък (трябва да е останала само Елена)
+    // Показваме сметката, за да видим крайния баланс
     bank.displayAllAccounts();
 
     return 0;

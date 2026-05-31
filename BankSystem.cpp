@@ -2,18 +2,17 @@
 #include "CheckingAccount.hpp"
 #include "SavingsAccount.hpp"
 #include <iostream>
+#include <stdexcept>
 
 BankSystem::BankSystem() {}
 
-// Деструктор - минава през вектора и трие обектите от Heap-а, предотвратявайки изтичане на памет
 BankSystem::~BankSystem() {
     for (Account* acc : accounts) {
-        delete acc; // Задейства виртуалния деструктор на Account
+        delete acc; 
     }
     accounts.clear();
 }
 
-// Линеен алгоритъм за търсене на сметка по уникален IBAN
 Account* BankSystem::findAccount(const std::string& iban) const {
     for (Account* acc : accounts) {
         if (acc->getIBAN() == iban) {
@@ -44,8 +43,8 @@ void BankSystem::openSavingsAccount(const std::string& iban, const std::string& 
 void BankSystem::closeAccount(const std::string& iban) {
     for (auto it = accounts.begin(); it != accounts.end(); ++it) {
         if ((*it)->getIBAN() == iban) {
-            delete *it;          // 1. Първо освобождаваме заделената памет за обекта
-            accounts.erase(it);  // 2. След това премахваме самия указател от вектора
+            delete *it;          
+            accounts.erase(it);  
             std::cout << "[Успех] Сметката с IBAN " << iban << " беше затворена.\n";
             return;
         }
@@ -65,19 +64,30 @@ void BankSystem::displayAllAccounts() const {
 
 void BankSystem::performDeposit(const std::string& iban, double amount) {
     Account* acc = findAccount(iban);
-    if (acc) {
+    if (!acc) {
+        std::cout << "[Грешка] Сметката с IBAN " << iban << " не е намерена.\n";
+        return;
+    }
+    
+    try {
         acc->deposit(amount);
         std::cout << "[Успех] Депозирани " << amount << " BGN в сметка " << iban << "\n";
-    } else {
-        std::cout << "[Грешка] Сметката не е намерена.\n";
+    } catch (const std::exception& e) {
+        std::cout << "[Отказ на операция] Грешка: " << e.what() << "\n";
     }
 }
 
 void BankSystem::performWithdraw(const std::string& iban, double amount) {
     Account* acc = findAccount(iban);
-    if (acc) {
-        acc->withdraw(amount); // Динамично свързване (C++ знае дали да извика Checking или Savings версията)
-    } else {
-        std::cout << "[Грешка] Сметката не е намерена.\n";
+    if (!acc) {
+        std::cout << "[Грешка] Сметката с IBAN " << iban << " не е намерена.\n";
+        return;
+    }
+    
+    try {
+        acc->withdraw(amount);
+        std::cout << "[Успех] Изтеглени " << amount << " BGN от сметка " << iban << "\n";
+    } catch (const std::exception& e) {
+        std::cout << "[Отказ на operation] Грешка: " << e.what() << "\n";
     }
 }
