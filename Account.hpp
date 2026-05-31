@@ -28,6 +28,8 @@ public:
     std::string getOwner() const;
     double getBalance() const;
     const std::vector<Transaction>& getTransactions() const;
+
+    void addTransaction(const Transaction& tx);
 };
 
 #endif // ACCOUNT_HPP

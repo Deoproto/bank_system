@@ -31,6 +31,9 @@ public:
     void performTransfer(const std::string& fromIban, const std::string& toIban, double amount);
     void performApplyInterest(const std::string& iban);
     void displayAccountHistory(const std::string& iban) const;
+
+    void saveToFile() const;
+    void loadFromFile();
 };
 
 #endif // BANK_SYSTEM_HPP

@@ -15,7 +15,6 @@ private:
 public:
     // Конструктор
     Transaction(std::string type, double amount);
-
     // Конструктор, използван при зареждане от файл (когато времето вече е записано)
     Transaction(std::string type, double amount, std::string timestamp);
 

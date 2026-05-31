@@ -15,3 +15,6 @@ double Account::getBalance() const { return balance; }
 const std::vector<Transaction>& Account::getTransactions() const {
     return transactions;
 }
+void Account::addTransaction(const Transaction& tx) {
+    transactions.push_back(tx);
+}

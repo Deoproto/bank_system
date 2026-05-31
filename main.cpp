@@ -1,11 +1,29 @@
 #include <iostream>
 #include <clocale>
+#include <limits>
 #include <string>
 #include "BankSystem.hpp"
 
+bool readLine(const std::string& prompt, std::string& value) {
+    std::cout << prompt;
+    std::getline(std::cin, value);
+    return !std::cin.fail();
+}
+
+bool readDouble(const std::string& prompt, double& value) {
+    std::cout << prompt;
+    if (!(std::cin >> value)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return true;
+}
+
 void printMenu() {
     std::cout << "\n=========================================\n";
-    std::cout << "          БАНКОВА СИСТЕМА v1.1           \n";
+    std::cout << "          БАНКОВА СИСТЕМА v1.2           \n";
     std::cout << "=========================================\n";
     std::cout << "1. Отваряне на Разплащателна сметка\n";
     std::cout << "2. Отваряне на Спестовна сметка\n";
@@ -16,18 +34,19 @@ void printMenu() {
     std::cout << "7. Начисляване на лихва (Само за Спестовна)\n";
     std::cout << "8. Справка / История на транзакциите\n";
     std::cout << "9. Показване на всички сметки\n";
-    std::cout << "10. Изход от програмата\n";
+    std::cout << "10. Изход от програмата (Записване)\n";
     std::cout << "=========================================\n";
     std::cout << "Изберете опция (1-10): ";
 }
 
 int main() {
-    std::setlocale(LC_ALL, "bg_BG.UTF-8");
+    if (!std::setlocale(LC_ALL, "bg_BG.UTF-8")) {
+        std::setlocale(LC_ALL, "");
+    }
     BankSystem bank;
     
-    // Автоматични начални данни за бърз тест
-    bank.openCheckingAccount("BG11BNKB1111", "Петър Петров", 500.0, 2.00);
-    bank.openSavingsAccount("BG22BNKB2222", "Елена Георгиева", 1500.0, 0.03); // 3% лихва
+    // СТЪПКА 1: Автоматично зареждаме старите данни от файловете при стартиране
+    bank.loadFromFile();
 
     int choice = 0;
     std::string iban, owner, toIban;
@@ -42,61 +61,85 @@ int main() {
             continue;
         }
 
-        std::cin.ignore(); // Изчистваме буфера
+        std::cin.ignore(); 
 
         if (choice == 10) {
+            // СТЪПКА 2: Автоматично записваме всичко във файловете преди изход
+            bank.saveToFile();
             std::cout << "\nБлагодарим ви, че използвахте нашата банка. Довиждане!\n";
             break;
         }
 
         switch (choice) {
             case 1:
-                std::cout << "Въведете IBAN: "; std::getline(std::cin, iban);
-                std::cout << "Въведете Име на титуляр: "; std::getline(std::cin, owner);
-                std::cout << "Първоначален баланс: "; std::cin >> amount;
-                std::cout << "Такса за транзакция (напр. 2.00): "; std::cin >> fee;
+                if (!readLine("Въведете IBAN: ", iban) || !readLine("Въведете Име на титуляр: ", owner)) {
+                    std::cout << "[Грешка] Невалидни текстови данни. Опитайте отново.\n";
+                    break;
+                }
+                if (!readDouble("Първоначален баланс: ", amount) || !readDouble("Такса за транзакция (напр. 2.00): ", fee)) {
+                    std::cout << "[Грешка] Невалидна числова стойност. Опитайте отново.\n";
+                    break;
+                }
                 bank.openCheckingAccount(iban, owner, amount, fee);
                 break;
 
             case 2:
-                std::cout << "Въведете IBAN: "; std::getline(std::cin, iban);
-                std::cout << "Въведете Име на титуляр: "; std::getline(std::cin, owner);
-                std::cout << "Първоначален баланс: "; std::cin >> amount;
-                std::cout << "Лихвен процент (напр. 0.03 за 3%): "; std::cin >> rate;
+                if (!readLine("Въведете IBAN: ", iban) || !readLine("Въведете Име на титуляр: ", owner)) {
+                    std::cout << "[Грешка] Невалидни текстови данни. Опитайте отново.\n";
+                    break;
+                }
+                if (!readDouble("Първоначален баланс: ", amount) || !readDouble("Лихвен процент (напр. 0.03 за 3%): ", rate)) {
+                    std::cout << "[Грешка] Невалидна числова стойност. Опитайте отново.\n";
+                    break;
+                }
                 bank.openSavingsAccount(iban, owner, amount, rate);
                 break;
 
             case 3:
-                std::cout << "Въведете IBAN на сметката за затваряне: "; std::getline(std::cin, iban);
+                if (!readLine("Въведете IBAN на сметката за затваряне: ", iban)) {
+                    std::cout << "[Грешка] Невалиден IBAN. Опитайте отново.\n";
+                    break;
+                }
                 bank.closeAccount(iban);
                 break;
 
             case 4:
-                std::cout << "Въведете IBAN: "; std::getline(std::cin, iban);
-                std::cout << "Сума за депозит: "; std::cin >> amount;
+                if (!readLine("Въведете IBAN: ", iban) || !readDouble("Сума за депозит: ", amount)) {
+                    std::cout << "[Грешка] Невалидни данни за депозит. Опитайте отново.\n";
+                    break;
+                }
                 bank.performDeposit(iban, amount);
                 break;
 
             case 5:
-                std::cout << "Въведете IBAN: "; std::getline(std::cin, iban);
-                std::cout << "Сума за теглене: "; std::cin >> amount;
+                if (!readLine("Въведете IBAN: ", iban) || !readDouble("Сума за теглене: ", amount)) {
+                    std::cout << "[Грешка] Невалидни данни за теглене. Опитайте отново.\n";
+                    break;
+                }
                 bank.performWithdraw(iban, amount);
                 break;
 
             case 6:
-                std::cout << "Въведете IBAN на изпращача: "; std::getline(std::cin, iban);
-                std::cout << "Въведете IBAN на получателя: "; std::getline(std::cin, toIban);
-                std::cout << "Сума за превод: "; std::cin >> amount;
+                if (!readLine("Въведете IBAN на изпращача: ", iban) || !readLine("Въведете IBAN на получателя: ", toIban) || !readDouble("Сума за превод: ", amount)) {
+                    std::cout << "[Грешка] Невалидни данни за превод. Опитайте отново.\n";
+                    break;
+                }
                 bank.performTransfer(iban, toIban, amount);
                 break;
 
             case 7:
-                std::cout << "Въведете IBAN на спестовната сметка: "; std::getline(std::cin, iban);
+                if (!readLine("Въведете IBAN на спестовната сметка: ", iban)) {
+                    std::cout << "[Грешка] Невалиден IBAN. Опитайте отново.\n";
+                    break;
+                }
                 bank.performApplyInterest(iban);
                 break;
 
             case 8:
-                std::cout << "Въведете IBAN на сметката за справка: "; std::getline(std::cin, iban);
+                if (!readLine("Въведете IBAN на сметката за справка: ", iban)) {
+                    std::cout << "[Грешка] Невалиден IBAN. Опитайте отново.\n";
+                    break;
+                }
                 bank.displayAccountHistory(iban);
                 break;
 
