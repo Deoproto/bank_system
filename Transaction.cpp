@@ -1,4 +1,5 @@
 #include "Transaction.hpp"
+#include <iostream>
 #include <ctime>
 
 // Автоматично генериране на текущото време при нова транзакция
@@ -24,3 +25,10 @@ Transaction::Transaction(std::string type, double amount, std::string timestamp)
 std::string Transaction::getType() const { return type; }
 double Transaction::getAmount() const { return amount; }
 std::string Transaction::getTimestamp() const { return timestamp; }
+
+// Добави този метод най-отдолу в Transaction.cpp:
+void Transaction::display() const {
+    std::cout << "  [" << timestamp << "] " 
+              << type << ": " 
+              << amount << " BGN\n";
+}

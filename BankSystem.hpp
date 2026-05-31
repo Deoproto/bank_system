@@ -29,7 +29,8 @@ public:
     void performDeposit(const std::string& iban, double amount);
     void performWithdraw(const std::string& iban, double amount);
     void performTransfer(const std::string& fromIban, const std::string& toIban, double amount);
-
+    void performApplyInterest(const std::string& iban);
+    void displayAccountHistory(const std::string& iban) const;
 };
 
 #endif // BANK_SYSTEM_HPP

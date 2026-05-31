@@ -19,6 +19,8 @@ public:
     // Конструктор, използван при зареждане от файл (когато времето вече е записано)
     Transaction(std::string type, double amount, std::string timestamp);
 
+    void display() const;
+
     // Константни гетери (Капсулация)
     std::string getType() const;
     double getAmount() const;

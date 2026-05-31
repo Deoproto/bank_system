@@ -118,3 +118,44 @@ void BankSystem::performTransfer(const std::string& fromIban, const std::string&
         std::cout << "[Трансфер - Отказан] Операцията пропадна: " << e.what() << "\n";
     }
 }
+void BankSystem::performApplyInterest(const std::string& iban) {
+    Account* acc = findAccount(iban);
+    if (!acc) {
+        std::cout << "[Грешка] Сметката с IBAN " << iban << " не е намерена.\n";
+        return;
+    }
+
+    // dynamic_cast ни позволява безопасно да проверим дали обектът зад Account* е всъщност SavingsAccount*
+    SavingsAccount* savingsAcc = dynamic_cast<SavingsAccount*>(acc);
+    if (savingsAcc) {
+        savingsAcc->applyInterest();
+    } else {
+        std::cout << "[Отказ] Операцията е невъзможна. Тази сметка не е Спестовна!\n";
+    }
+}
+
+void BankSystem::displayAccountHistory(const std::string& iban) const {
+    Account* acc = findAccount(iban);
+    if (!acc) {
+        std::cout << "[Грешка] Сметката с IBAN " << iban << " не е намерена.\n";
+        return;
+    }
+
+    std::cout << "\n==================================================\n";
+    std::cout << "  ИСТОРИЯ НА ТРАНЗАКЦИИТЕ ЗА СМЕТКА: " << iban << "\n";
+    std::cout << "  Титуляр: " << acc->getOwner() << " | Текущ баланс: " << acc->getBalance() << " BGN\n";
+    std::cout << "==================================================\n";
+
+    // Взимаме вектора с транзакции през гетъра, който написахме в Checkpoint 2
+    const std::vector<Transaction>& history = acc->getTransactions();
+
+    if (history.empty()) {
+        std::cout << "  Няма извършени транзакции по тази сметка.\n";
+    } else {
+        // Обхождаме и печатаме всяка транзакция
+        for (const Transaction& tx : history) {
+            tx.display(); // Извикваме метода display() от Transaction.cpp
+        }
+    }
+    std::cout << "==================================================\n";
+}
